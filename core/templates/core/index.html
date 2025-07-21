@@ -1,65 +1,72 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎙️ Voice of the City</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Theme toggle with localStorage
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+        });
+
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
+            localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
         }
     </script>
 </head>
-<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-500">
+<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition duration-500">
 
-    <header class="text-center py-6">
-        <h1 class="text-4xl font-bold mb-2 text-purple-700 dark:text-purple-300">🎙️ Voice of the City</h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300">Your multilingual city guide powered by AI & voice</p>
-        <button onclick="toggleTheme()" class="mt-4 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded shadow text-sm">Mode</button>
+    <header class="text-center py-6 bg-gradient-to-r from-purple-200 to-indigo-300 dark:from-gray-800 dark:to-gray-700">
+        <h1 class="text-4xl font-extrabold text-purple-800 dark:text-purple-300">🎙️ Voice of the City</h1>
+        <p class="text-lg text-gray-700 dark:text-gray-300">Your multilingual city guide powered by AI & voice</p>
+        <button onclick="toggleTheme()" class="mt-4 px-5 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded shadow text-sm">Toggle Mode</button>
     </header>
 
-    <main class="max-w-3xl mx-auto px-4 space-y-8">
+    <main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-        <!-- Welcome Message and Features -->
-        <section class="p-4 rounded-lg bg-gradient-to-r from-indigo-100 to-purple-200 dark:from-gray-800 dark:to-gray-700 shadow">
-            <h2 class="text-2xl font-semibold mb-2">Welcome 👋</h2>
-            <p class="mb-2">Explore your city with our AI-powered translator in three ways:</p>
-            <ul class="list-disc list-inside space-y-1">
+        <!-- Welcome and Features -->
+        <section class="space-y-4 bg-gradient-to-br from-indigo-100 to-purple-200 dark:from-gray-800 dark:to-gray-700 p-6 rounded shadow">
+            <h2 class="text-2xl font-bold">Welcome 👋</h2>
+            <ul class="list-disc list-inside space-y-2">
                 <li>🎧 Real-time voice input with recording</li>
                 <li>📂 Upload an audio file for translation</li>
                 <li>💬 Type in any text and get translations</li>
-                <li>🌐 Supports multiple languages and speech output</li>
-                <li>🌞 Light & 🌙 Dark mode UI</li>
+                <li>🌐 Multi-language translation + speech generation</li>
+                <li>🌓 Light/Dark toggle with Tailwind transitions</li>
             </ul>
         </section>
 
+        <!-- Input Form -->
         <form method="post" enctype="multipart/form-data" action="/" class="space-y-6">
             {% csrf_token %}
 
-            <!-- Real-time Recording -->
             <div class="space-y-2">
-                <label class="font-semibold">🎙️ Real-time Audio Input</label>
+                <label class="font-semibold block">🎙️ Real-time Audio Input</label>
                 <button type="button" id="recordBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Start Recording</button>
                 <audio id="recordedAudio" controls class="hidden w-full mt-2"></audio>
                 <input type="hidden" name="audio_base64" id="audioBase64">
             </div>
 
-            <!-- Audio File Upload -->
             <div class="space-y-2">
-                <label for="audio" class="font-semibold">📁 Upload Audio File</label>
-                <input type="file" name="audio" id="audio" accept="audio/*" class="w-full p-2 border rounded">
+                <label for="audio" class="font-semibold block">📁 Upload Audio File</label>
+                <input type="file" name="audio" id="audio" accept="audio/*" class="w-full p-2 border rounded text-black">
             </div>
 
-            <!-- Text Input -->
             <div class="space-y-2">
-                <label for="text" class="font-semibold">💬 Enter Text</label>
-                <textarea name="text" id="text" rows="3" class="w-full p-2 border rounded" placeholder="Type your message..."></textarea>
+                <label for="text" class="font-semibold block">💬 Enter Text</label>
+                <textarea name="text" id="text" rows="3" placeholder="Type your message..." class="w-full p-2 border rounded text-black dark:text-white dark:bg-gray-800"></textarea>
             </div>
 
-            <!-- Language Selection -->
             <div class="space-y-2">
-                <label for="target_lang" class="font-semibold">🌍 Translate to</label>
+                <label for="target_lang" class="font-semibold block">🌍 Translate to</label>
                 <select name="target_lang" id="target_lang" class="w-full p-2 rounded text-black">
                     {% for lang in languages %}
                         <option value="{{ lang }}">{{ lang|capfirst }}</option>
@@ -67,12 +74,14 @@
                 </select>
             </div>
 
-            <!-- Submit -->
             <div>
                 <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded transition">Translate 🎯</button>
             </div>
         </form>
 
+    </main>
+
+    <section class="max-w-3xl mx-auto px-4 py-6 space-y-6">
         {% if error %}
             <div class="p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 rounded shadow">
                 <strong>❌ Error:</strong> {{ error }}
@@ -80,36 +89,36 @@
         {% endif %}
 
         {% if transcription %}
-            <section class="bg-yellow-100 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200 p-4 rounded">
+            <div class="p-4 bg-yellow-100 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200 rounded shadow">
                 <h3 class="font-semibold text-lg">🔊 Transcription</h3>
-                <p class="mt-1">{{ transcription }}</p>
-            </section>
+                <p>{{ transcription }}</p>
+            </div>
         {% endif %}
 
         {% if story %}
-            <section class="bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-200 p-4 rounded">
+            <div class="p-4 bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-200 rounded shadow">
                 <h3 class="font-semibold text-lg">📖 Generated Story</h3>
-                <p class="mt-1">{{ story }}</p>
-            </section>
+                <p>{{ story }}</p>
+            </div>
         {% endif %}
 
         {% if translated %}
-            <section class="bg-green-100 dark:bg-green-800 text-green-900 dark:text-green-200 p-4 rounded">
+            <div class="p-4 bg-green-100 dark:bg-green-800 text-green-900 dark:text-green-200 rounded shadow">
                 <h3 class="font-semibold text-lg">🌐 Translation</h3>
-                <p class="mt-1">{{ translated }}</p>
-            </section>
+                <p>{{ translated }}</p>
+            </div>
         {% endif %}
 
         {% if audio_path %}
-            <section class="p-4 rounded bg-purple-100 dark:bg-purple-800">
-                <h3 class="font-semibold">🎧 Listen</h3>
+            <div class="p-4 bg-purple-100 dark:bg-purple-800 text-purple-900 dark:text-purple-200 rounded shadow">
+                <h3 class="font-semibold text-lg">🎧 Listen</h3>
                 <audio controls class="w-full mt-2">
                     <source src="{{ audio_path }}" type="audio/mpeg">
                     Your browser does not support the audio element.
                 </audio>
-            </section>
+            </div>
         {% endif %}
-    </main>
+    </section>
 
     <script>
         let mediaRecorder;
@@ -135,7 +144,8 @@
 
                     const reader = new FileReader();
                     reader.onloadend = function () {
-                        document.getElementById("audioBase64").value = reader.result.split(",")[1];
+                        const base64 = reader.result.split(",")[1];
+                        document.getElementById("audioBase64").value = base64;
                     };
                     reader.readAsDataURL(audioBlob);
                 };
